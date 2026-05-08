@@ -1,6 +1,6 @@
 // script.js (v13.0 - El Compañero Reactivo)
 document.addEventListener('DOMContentLoaded', () => {
-    const ALE_API_URL = "http://127.0.0.1:5000/api/execute";
+    const ALE_API_URL = "https://veridian-lwzi.onrender.com/api/execute";
     const MODES = { correcciones: 'Corrección', sugerencias: 'Sugerencias', corregido: 'Texto Corregido' };
     const MAX_WORDS = 2000;
 
