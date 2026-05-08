@@ -8,6 +8,7 @@
 #   2. Corré: python server.py
 #   3. Abrí index.html en el navegador
 
+import os
 import re
 import json
 from flask import Flask, request, jsonify
