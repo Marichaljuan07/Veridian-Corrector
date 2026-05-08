@@ -1,6 +1,15 @@
+# server.py - Veridian Backend con Groq
+#
+# INSTALACIÓN:
+#   pip install flask flask-cors requests
+#
+# USO:
+#   1. Pegá tu API key de Groq abajo
+#   2. Corré: python server.py
+#   3. Abrí index.html en el navegador
+
 import re
 import json
-import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import requests
@@ -8,6 +17,8 @@ import requests
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
+# 👇 PEGÁ TU API KEY DE GROQ ACÁ
+# Conseguila gratis en: console.groq.com
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
 PROMPT = """Sos un corrector de textos experto en español rioplatense.
@@ -38,8 +49,10 @@ Estructura exacta:
 
 Reglas:
 - "correcciones": errores de ortografía, gramática, puntuación, acentos. Máximo 15.
+- El campo "original" en correcciones debe ser la palabra o palabras MÍNIMAS con el error. Máximo 3 palabras. Nunca una frase entera.
 - "sugerencias": mejoras de claridad o estructura. Máximo 8.
-- El campo "original" debe existir EXACTAMENTE igual en el texto.
+- El campo "original" en sugerencias puede ser una frase pero debe ser lo más corta posible.
+- El campo "original" debe existir EXACTAMENTE igual en el texto, incluyendo mayúsculas, espacios y puntuación. Verificá caracter por caracter antes de incluirlo. Si no estás seguro, no lo incluyas.
 - Si no hay errores, devolvé arrays vacíos.
 - IDs únicos: c1, c2... y s1, s2...
 - Explicaciones cortas, en español, sin tecnicismos."""
@@ -77,7 +90,7 @@ def execute():
                     {"role": "user",   "content": texto}
                 ],
                 "max_tokens": 2048,
-                "temperature": 0.1
+               "temperature": 0
             },
             timeout=30
         )
@@ -90,7 +103,13 @@ def execute():
         raw = re.sub(r'^```\s*',     '', raw)
         raw = re.sub(r'\s*```$',     '', raw)
 
-        resultado = json.loads(raw)
+        try:
+            resultado = json.loads(raw)
+        except json.JSONDecodeError:
+            raw = re.sub(r',\s*}', '}', raw)
+            raw = re.sub(r',\s*]', ']', raw)
+            resultado = json.loads(raw)
+
         resultado.setdefault('correcciones',    [])
         resultado.setdefault('sugerencias',     [])
         resultado.setdefault('texto_corregido', texto)
