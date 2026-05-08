@@ -1,6 +1,6 @@
 // script.js (v13.0 - El Compañero Reactivo)
 document.addEventListener('DOMContentLoaded', () => {
-    const ALE_API_URL = "https://veridian-lwzi.onrender.com/api/execute";
+    const ALE_API_URL = "http://127.0.0.1:5000/api/execute";
     const MODES = { correcciones: 'Corrección', sugerencias: 'Sugerencias', corregido: 'Texto Corregido' };
     const MAX_WORDS = 2000;
 
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dom.inputText.addEventListener('input', () => {
         const text = dom.inputText.value;
-        const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+        const wordCount = (text.match(/[a-záéíóúüñA-ZÁÉÍÓÚÜÑ][^\s]*/g) || []).length;
         dom.wordCounter.textContent = `${wordCount} / ${MAX_WORDS} palabras`;
         dom.charCounter.textContent = `${text.length} caracteres`;
         dom.pulirBtn.disabled = state.isProcessing || wordCount > MAX_WORDS || wordCount === 0;
@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderOutputBox();
         }
     }
-    [dom.inputText, dom.outputText].forEach(box => box.addEventListener('dblclick', () => { if (dom.outputText.innerText.trim() !== 'Aquí aparecerá tu texto pulido...') enterFocusMode(box === dom.inputText ? 'input' : 'output'); }));
+    [dom.inputText, dom.outputText].forEach(box => box.addEventListener('dblclick', () => { enterFocusMode(box === dom.inputText ? 'input' : 'output'); }));
     dom.focusCloseBtn.addEventListener('click', () => { state.isFocusMode = false; dom.body.classList.remove('focus-mode'); renderOutputBox(); });
 
     function createStarryBackground(count, size) {
