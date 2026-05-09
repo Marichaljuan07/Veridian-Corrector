@@ -50,7 +50,7 @@ Estructura exacta:
 
 Reglas:
 - "correcciones": errores de ortografía, gramática, puntuación, acentos. Máximo 15.
-- El campo "original" en correcciones debe ser la palabra o palabras MÍNIMAS con el error. Máximo 3 palabras. Nunca una frase entera.
+- El campo "original" en correcciones debe contener ÚNICAMENTE la palabra con error, sin incluir palabras correctas adyacentes. Si el error involucra dos palabras juntas como "por que" → "porque", incluí ambas. Nunca más de eso.
 - "sugerencias": mejoras de claridad o estructura. Máximo 8.
 - El campo "original" en sugerencias puede ser una frase pero debe ser lo más corta posible.
 - El campo "original" debe existir EXACTAMENTE igual en el texto, incluyendo mayúsculas, espacios y puntuación. Verificá caracter por caracter antes de incluirlo. Si no estás seguro, no lo incluyas.
