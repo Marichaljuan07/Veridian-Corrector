@@ -1,3 +1,5 @@
+
+
 // script.js (v13.3 - Tooltip Editable)
 document.addEventListener('DOMContentLoaded', () => {
     const ALE_API_URL = "https://veridian-lwzi.onrender.com/api/execute";
@@ -402,3 +404,4 @@ document.addEventListener('DOMContentLoaded', () => {
     dom.inputText.dispatchEvent(new Event('input'));
     updateUI();
 });
+
