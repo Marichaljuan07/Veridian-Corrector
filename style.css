@@ -1,3 +1,5 @@
+
+
 /* --- VARIABLES GLOBALES DE DISEÑO --- */
 :root {
     --bg-color: #0D1117;
@@ -253,3 +255,5 @@ body.focus-mode #focus-view { transform: scale(1); opacity: 1; visibility: visib
     display: flex;
     justify-content: space-around;
     width: 100%;
+}
+
