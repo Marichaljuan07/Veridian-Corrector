@@ -1,4 +1,4 @@
-// script.js (v13.0 - El Compañero Reactivo)
+// script.js (v13.3 - Tooltip Editable)
 document.addEventListener('DOMContentLoaded', () => {
     const ALE_API_URL = "https://veridian-lwzi.onrender.com/api/execute";
     const MODES = { correcciones: 'Corrección', sugerencias: 'Sugerencias', corregido: 'Texto Corregido' };
@@ -33,13 +33,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let state = {
         originalText: '',
         apiResponse: null,
-        changesState: {}, // 'pending', 'accepted', 'ignored'
+        changesState: {},
         activeMode: null,
         isProcessing: false,
         currentTooltip: null,
         isFocusMode: false,
+        explanationLevel: 'basico',
         dictionary: JSON.parse(localStorage.getItem('veridian_dictionary')) || []
     };
+
+    // --- SELECTOR DE NIVEL DE EXPLICACIÓN ---
+    document.querySelectorAll('.level-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.explanationLevel = btn.dataset.level;
+        });
+    });
 
     // --- LÓGICA DE COPIAR Y DESCARGAR ---
     const copyToClipboard = async (text, button) => {
@@ -91,7 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
         downloadAsTxt(textToDownload);
     };
 
-    // --- ASIGNACIÓN DE EVENTOS ---
     dom.copyBtn.addEventListener('click', handleCopy);
     dom.downloadBtn.addEventListener('click', handleDownload);
     dom.focusCopyBtn.addEventListener('click', handleFocusCopy);
@@ -113,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const counts = { correcciones: '—', sugerencias: '—', corregido: '—' };
 
         if (state.apiResponse && !state.isProcessing) {
-            // *** LÓGICA DE CONTADORES DINÁMICOS ***
             counts.correcciones = state.apiResponse.correcciones.filter(c => state.changesState[c.id] === 'pending').length;
             counts.sugerencias = state.apiResponse.sugerencias.filter(s => state.changesState[s.id] === 'pending').length;
             if (state.apiResponse.correcciones.length === 0) counts.correcciones = '—';
@@ -215,8 +223,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const button = e.target.closest('button');
         if (!button || !state.currentTooltip) return;
         const { change } = state.currentTooltip;
-        if (button.classList.contains('accept-btn')) state.changesState[change.id] = 'accepted';
-        if (button.classList.contains('ignore-btn')) state.changesState[change.id] = 'ignored';
+
+        if (button.classList.contains('accept-btn')) {
+            state.changesState[change.id] = 'accepted';
+            hideTooltip();
+            updateUI();
+            renderOutputBox();
+            return;
+        }
+
+        if (button.classList.contains('ignore-btn')) {
+            state.changesState[change.id] = 'ignored';
+            hideTooltip();
+            updateUI();
+            renderOutputBox();
+            return;
+        }
+
         if (button.classList.contains('dict-btn')) {
             const word = change.original.toLowerCase();
             if (!state.dictionary.includes(word)) {
@@ -227,11 +250,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 const c = [...state.apiResponse.correcciones, ...state.apiResponse.sugerencias].find(ch => ch.id === id);
                 if (c && c.original.toLowerCase() === word) state.changesState[id] = 'ignored';
             });
+            hideTooltip();
+            updateUI();
+            renderOutputBox();
+            return;
         }
-        hideTooltip();
-        // *** ACTUALIZACIÓN INSTANTÁNEA ***
-        updateUI();
-        renderOutputBox();
+
+        if (button.classList.contains('modify-btn')) {
+            const actionsDiv = dom.tooltip.querySelector('.tooltip-actions');
+            actionsDiv.innerHTML = `
+                <input type="text" class="modify-input" value="${escapeHtml(change.replacement)}" />
+                <button class="confirm-modify-btn">Confirmar</button>
+            `;
+            const input = actionsDiv.querySelector('.modify-input');
+            const confirmBtn = actionsDiv.querySelector('.confirm-modify-btn');
+            input.focus();
+            input.select();
+
+            confirmBtn.addEventListener('click', (ev) => {
+                ev.stopPropagation();
+                const newValue = input.value.trim();
+                if (newValue) change.replacement = newValue;
+                state.changesState[change.id] = 'accepted';
+                hideTooltip();
+                updateUI();
+                renderOutputBox();
+            });
+            return;
+        }
     });
 
     function showTooltip(span) {
@@ -244,7 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalHTML = `<span class="original">${escapeHtml(change.original)}</span>`;
         const replacementHTML = `<strong class="replacement">${escapeHtml(change.replacement)}</strong>`;
         const explanationHTML = `<span class="explanation">${escapeHtml(change.reason)}</span>`;
-        const buttonsHtml = `<button class="accept-btn">Aceptar</button>${change.type === 'correction' ? '<button class="dict-btn">Diccionario</button>' : ''}<button class="ignore-btn">Ignorar</button>`;
+        const buttonsHtml = `<button class="accept-btn">Aceptar</button><button class="modify-btn">Modificar</button>${change.type === 'correction' ? '<button class="dict-btn">Diccionario</button>' : ''}<button class="ignore-btn">Ignorar</button>`;
         dom.tooltip.innerHTML = `<div class="tooltip-content">${originalHTML} → ${replacementHTML}${explanationHTML}</div><div class="tooltip-actions">${buttonsHtml}</div>`;
         positionTooltip(dom.tooltip, span);
         dom.tooltip.classList.add('visible');
@@ -296,8 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dom.introScreen.querySelector('#stars-near').style.backgroundImage = `url(${createStarryBackground(20, 1.2)})`;
     }
 
-
-    // --- BOTÓN PULIR: llamada al backend con manejo de errores ---
+    // --- BOTÓN PULIR ---
     dom.pulirBtn.addEventListener('click', async () => {
         const texto = dom.inputText.value.trim();
         if (!texto) return;
@@ -314,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(ALE_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: texto })
+                body: JSON.stringify({ text: texto, nivel: state.explanationLevel })
             });
 
             if (!response.ok) {
