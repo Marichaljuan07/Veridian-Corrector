@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Veridian MVP</title>
-    
-    <!-- 1. Enlace a la hoja de estilos CSS -->
     <link rel="stylesheet" href="style.css">
-
 </head>
 <body>
 
@@ -29,12 +26,21 @@
     <section id="editor-screen" class="screen hidden">
         <div id="editor-container" class="editor-container">
             
-            <!-- Panel de Control Reestructurado -->
+            <!-- Panel de Control -->
             <div id="main-control-panel" class="control-panel-stacked">
 
-                <!-- Fila 2: Modos de Visualización (JavaScript lo llena) -->
+                <!-- Fila 1: Selector de nivel de explicación -->
+                <div class="control-row level-row">
+                    <span class="motor-label">Explicación:</span>
+                    <div class="level-selector">
+                        <button class="level-btn active" data-level="basico">Básico</button>
+                        <button class="level-btn" data-level="intermedio">Intermedio</button>
+                        <button class="level-btn" data-level="avanzado">Avanzado</button>
+                    </div>
+                </div>
+
+                <!-- Fila 2: Modos de Visualización -->
                 <div id="mode-controls-wrapper" class="control-row">
-                    <!-- El JavaScript llenará esto con los botones de Corrección y Sugerencia -->
                 </div>
 
             </div>
@@ -92,7 +98,6 @@
     <div id="tooltip"></div>
     <div id="help-tooltip"></div>
 
-    <!-- 2. Enlace al script de JavaScript -->
     <script src="script.js" defer></script>
 
 </body>
