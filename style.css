@@ -86,7 +86,37 @@ html, body {
     font-weight: bold;
     color: var(--text-off-color);
     margin-right: 15px;
+    white-space: nowrap;
 }
+
+/* --- SELECTOR DE NIVEL DE EXPLICACIÓN --- */
+.level-row {
+    justify-content: flex-start;
+}
+.level-selector {
+    display: flex;
+    gap: 8px;
+    flex-grow: 1;
+}
+.level-btn {
+    flex: 1;
+    background-color: var(--box-bg);
+    border: 1px solid var(--box-border);
+    color: var(--text-off-color);
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+.level-btn:hover { border-color: var(--glow-color-dark); color: var(--text-color); }
+.level-btn.active {
+    background-color: var(--glow-color-dark);
+    border-color: var(--glow-color);
+    color: #000;
+}
+
 .select-wrapper {
     flex-grow: 1;
     position: relative;
@@ -174,7 +204,7 @@ body.focus-mode #focus-view { transform: scale(1); opacity: 1; visibility: visib
 .focus-content-wrapper { flex-grow: 1; min-height: 0; position: relative; }
 .focus-content { width: 100%; height: 100%; background-color: var(--box-bg); border: 1px solid var(--box-border); border-radius: 12px; padding: 20px; box-sizing: border-box; overflow-y: auto; line-height: 1.7; font-size: 18px; transition: opacity 0.2s ease-in-out; }
 .correction { border-bottom: 2px solid var(--green-accent); cursor: pointer; }
-.suggestion { border-bottom: 2px solid var(--yellow-accent); cursor: pointer; }
+.suggestion { border-bottom: 2px solid var(--yellow-accent); cursor: pointer; padding: 0 2px; margin: 0 1px; border-radius: 2px; }
 
 /* --- TOOLTIPS INTERACTIVOS --- */
 #tooltip { position: fixed; z-index: 1000; background-color: #2a2a2a; color: #fff; padding: 15px; border-radius: 8px; border: 1px solid #444; width: max-content; max-width: 300px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); visibility: hidden; opacity: 0; transition: opacity 0.2s; }
@@ -185,8 +215,36 @@ body.focus-mode #focus-view { transform: scale(1); opacity: 1; visibility: visib
 .tooltip-actions { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 .tooltip-actions button { padding: 8px 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; color: #fff; }
 .tooltip-actions .accept-btn { background-color: var(--green-accent); }
+.tooltip-actions .modify-btn { background-color: #8e44ad; }
 .tooltip-actions .dict-btn { background-color: var(--blue-accent); }
 .tooltip-actions .ignore-btn { background-color: var(--red-accent); }
+
+/* --- CAMPO EDITABLE DEL TOOLTIP --- */
+.modify-input {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--glow-color);
+    background: #1a1a2e;
+    color: #fff;
+    font-size: 14px;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+    outline: none;
+}
+.confirm-modify-btn {
+    background-color: var(--glow-color-dark);
+    color: #000;
+    font-weight: bold;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 14px;
+}
+.confirm-modify-btn:hover { background-color: var(--glow-color); }
+
 #help-tooltip { position: fixed; z-index: 1001; background-color: #333; color: #fff; padding: 10px 15px; border-radius: 8px; border: 1px solid #555; max-width: 250px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); visibility: hidden; opacity: 0; transition: opacity 0.2s; font-size: 14px; line-height: 1.5; }
 #help-tooltip.visible { visibility: visible; opacity: 1; }
 
@@ -195,4 +253,3 @@ body.focus-mode #focus-view { transform: scale(1); opacity: 1; visibility: visib
     display: flex;
     justify-content: space-around;
     width: 100%;
-}
