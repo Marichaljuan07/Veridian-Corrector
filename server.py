@@ -8,7 +8,6 @@
 #   2. Corré: python server.py
 #   3. Abrí index.html en el navegador
 
-import os
 import re
 import json
 from flask import Flask, request, jsonify
@@ -19,44 +18,51 @@ app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
 # 👇 PEGÁ TU API KEY DE GROQ ACÁ
-# Conseguila gratis en: console.groq.com
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 
-PROMPT = """Sos un corrector de textos experto en español rioplatense.
+INSTRUCCION_NIVEL = {
+    "basico": "El campo 'reason' debe ser MUY breve: máximo 5 palabras. Solo nombra el tipo de error. Ejemplo: 'falta tilde', 'error de concordancia', 'palabra unida'.",
+    "intermedio": "El campo 'reason' debe explicar la regla general en una oración. Ejemplo: 'Las palabras agudas terminadas en vocal llevan tilde.'",
+    "avanzado": "El campo 'reason' debe explicar en detalle la regla gramatical, su propósito y contexto. Puede tener 2-3 oraciones."
+}
+
+def get_prompt(nivel):
+    instruccion = INSTRUCCION_NIVEL.get(nivel, INSTRUCCION_NIVEL["basico"])
+    return f"""Sos un corrector de textos experto en español rioplatense.
 Analizá el texto y devolvé ÚNICAMENTE un JSON válido, sin explicaciones ni bloques de código.
 
 Estructura exacta:
-{
+{{
   "correcciones": [
-    {
+    {{
       "id": "c1",
       "type": "correction",
       "original": "fragmento exacto del texto con error",
       "replacement": "fragmento corregido",
-      "reason": "explicación breve y clara"
-    }
+      "reason": "explicación según nivel"
+    }}
   ],
   "sugerencias": [
-    {
+    {{
       "id": "s1",
       "type": "suggestion",
       "original": "fragmento a mejorar",
       "replacement": "fragmento mejorado",
-      "reason": "por qué mejora el texto"
-    }
+      "reason": "explicación según nivel"
+    }}
   ],
   "texto_corregido": "texto completo con todas las correcciones aplicadas"
-}
+}}
 
 Reglas:
 - "correcciones": errores de ortografía, gramática, puntuación, acentos. Máximo 15.
 - El campo "original" en correcciones debe contener ÚNICAMENTE la palabra con error, sin incluir palabras correctas adyacentes. Si el error involucra dos palabras juntas como "por que" → "porque", incluí ambas. Nunca más de eso.
 - "sugerencias": mejoras de claridad o estructura. Máximo 8.
 - El campo "original" en sugerencias puede ser una frase pero debe ser lo más corta posible.
-- El campo "original" debe existir EXACTAMENTE igual en el texto, incluyendo mayúsculas, espacios y puntuación. Verificá caracter por caracter antes de incluirlo. Si no estás seguro, no lo incluyas.
+- El campo "original" debe existir EXACTAMENTE igual en el texto, incluyendo mayúsculas, espacios y puntuación. Copiá el fragmento directamente del texto sin modificarlo. Si no podés copiarlo exactamente, no lo incluyas. Esto aplica tanto a correcciones como a sugerencias.
 - Si no hay errores, devolvé arrays vacíos.
 - IDs únicos: c1, c2... y s1, s2...
-- Explicaciones cortas, en español, sin tecnicismos."""
+- NIVEL DE EXPLICACIÓN para el campo "reason": {instruccion}"""
 
 
 @app.route('/')
@@ -77,6 +83,9 @@ def execute():
     if not texto:
         return jsonify({'error': 'Texto vacío'}), 400
 
+    nivel = data.get('nivel', 'basico')
+    prompt = get_prompt(nivel)
+
     try:
         resp = requests.post(
             "https://api.groq.com/openai/v1/chat/completions",
@@ -87,11 +96,11 @@ def execute():
             json={
                 "model": "llama-3.3-70b-versatile",
                 "messages": [
-                    {"role": "system", "content": PROMPT},
+                    {"role": "system", "content": prompt},
                     {"role": "user",   "content": texto}
                 ],
-                "max_tokens": 2048,
-               "temperature": 0
+                "max_tokens": 4096,
+                "temperature": 0
             },
             timeout=30
         )
@@ -121,5 +130,5 @@ def execute():
         return jsonify({'error': str(e)}), 500
 
 
-if __name__ == '__main__':
+if _name_ == '_main_':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
