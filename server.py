@@ -59,6 +59,9 @@ Estructura exacta:
 
 Reglas:
 - "correcciones": errores de ortografía, gramática, puntuación, acentos. Máximo 15.
+- NUNCA marques como error el sujeto omitido o tácito. En español es gramaticalmente correcto omitir el sujeto cuando se sobreentiende por el contexto. Ejemplo: "Fui al mercado" es correcto, NO lo corrijas.
+- NUNCA agregues comas que no existen en el texto original a menos que su ausencia genere ambigüedad real. No corrijas estilo de puntuación en correcciones, solo errores claros.
+- NO mezcles correcciones con sugerencias. Las correcciones son SOLO errores objetivos de ortografía, gramática y acentos. Si algo es opinable o de estilo, va en sugerencias o no va.
 - El campo "original" en correcciones debe contener ÚNICAMENTE la palabra con error, sin incluir palabras correctas adyacentes. Si el error involucra dos palabras juntas como "por que" → "porque", incluí ambas. Nunca más de eso.
 - "sugerencias": mejoras de claridad o estructura. Máximo 8.
 - El campo "original" en sugerencias puede ser una frase pero debe ser lo más corta posible.
